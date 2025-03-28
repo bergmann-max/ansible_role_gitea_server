@@ -32,9 +32,17 @@ The role also installs a `systemd` service to manage the Docker Compose lifecycl
 | `gitea_server_docker_image_postgress` | `postgres:latest`     | Docker image used for the PostgreSQL service                                |
 | `gitea_server_timezone`       | `Europe/Berlin`          | Timezone to configure in the containers                                     |
 
-> **Note:**  
-> The PostgreSQL DB password must be set in the `.env` file. You have to copy the provided `example.env` to `{{ gitea_server_path }}/.env`.  
-> You **must** manually edit the resulting `.env` file to set a secure value for `GITEA_SERVER_DB_PASSWORD`.
+> **Important:**  
+> Before running this role, you **must** set the PostgreSQL DB password in the `.env` file.  
+> First, copy the provided `example.env` to `{{ gitea_server_path }}/.env`:  
+>  
+> ```bash
+> cp example.env {{ gitea_server_path }}/.env
+> ```  
+>  
+> Then, manually edit the resulting `.env` file and set a secure value for `GITEA_SERVER_DB_PASSWORD`.  
+>  
+> ⚠️ If you skip this step, the role will fail.
 
 ---
 
