@@ -24,8 +24,8 @@ The role also installs a `systemd` service to manage the Docker Compose lifecycl
 | Variable                      | Default Value            | Description                                                                 |
 |-------------------------------|--------------------------|-----------------------------------------------------------------------------|
 | `gitea_server_path`           | `/opt/gitea`             | Directory where Gitea will be deployed                                      |
-| `gitea_server_user`           | `git`                    | System user to run Gitea and own files                                      |
-| `gitea_server_group`          | `git`                    | System group to run Gitea                                                   |
+| `gitea_server_user`           | `gitea`                    | System user to run Gitea and own files                                      |
+| `gitea_server_group`          | `docker`                    | System group to run Gitea                                                   |
 | `gitea_server_domain`         | `git.example.com`        | Public domain under which Gitea is reachable                                |
 | `gitea_server_network`        | `gitea_network`          | Docker network name used by the containers                                  |
 | `gitea_server_docker_image`   | `gitea/gitea:latest`     | Docker image used for the Gitea service                                     |
