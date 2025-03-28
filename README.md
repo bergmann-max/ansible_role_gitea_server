@@ -46,24 +46,17 @@ The role also installs a `systemd` service to manage the Docker Compose lifecycl
   become: true
   roles:
     - role: gitea_docker_compose
-      vars:
-        gitea_server_path: /opt/gitea
-        gitea_server_user: git
-        gitea_server_group: git
-        gitea_server_domain: git.example.com
-        gitea_server_network: gitea_net
 ```
 
 ---
 
 ## Tags
 
-| Tag      | Purpose                          |
-|----------|----------------------------------|
-| gitea    | Install and configure Gitea      |
-| docker   | Setup Docker Compose services    |
-| systemd  | Install systemd unit             |
-| envfile  | Deploy and secure `.env` file    |
+| Tag               | Purpose                                   |
+|--------------------|------------------------------------------|
+| gitea_user_setup   | Create user and directory structure      |
+| gitea_docker_setup | Deploy Docker Compose and network setup  |
+| gitea_service_setup| Install and enable systemd unit          |
 
 ---
 
@@ -71,7 +64,6 @@ The role also installs a `systemd` service to manage the Docker Compose lifecycl
 
 This role ensures:
 - Docker Compose files are templated and deployed to `{{ gitea_server_path }}`
-- `.env` file is copied and ready for customization
 - System user and group are set as owners
 - A systemd unit is installed for managing Gitea via `systemctl`
 - All file paths and permissions are sane and secure
