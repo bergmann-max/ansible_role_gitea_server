@@ -1,7 +1,75 @@
 ---
-# roles/ansible_role_template/tasks/main.yml
+# roles/gitea_server/tasks/main.yml
 
-- name: Update repositories cache and install "foo" package
-  ansible.builtin.apt:
-    name: foo
-    update_cache: yes
+- name: User and Directory Setup
+  tags: gitea_user_setup
+  block:
+    - name: Ensure Gitea user exists
+      ansible.builtin.user:
+        name: "{{ gitea_server_user }}"
+        group: "{{ gitea_server_group }}"
+        create_home: false
+        shell: /sbin/nologin
+        system: true
+
+    - name: Ensure Gitea directory exists with correct owner and permissions
+      ansible.builtin.file:
+        path: "{{ gitea_server_path }}"
+        state: directory
+        owner: "{{ gitea_server_user }}"
+        group: "{{ gitea_server_group }}"
+        mode: "u=rwx,g=rx,o="
+        recurse: true
+
+- name: Docker Compose and Network Setup
+  tags: gitea_docker_setup
+  block:
+    - name: Deploy Docker Compose file
+      ansible.builtin.template:
+        src: docker-compose.yml.j2
+        dest: "{{ gitea_server_path }}/docker-compose.yml"
+        owner: "{{ gitea_server_user }}"
+        group: "{{ gitea_server_group }}"
+        mode: "0640"
+
+    - name: Re-deploy Docker Compose file with different permissions (if needed)
+      ansible.builtin.template:
+        src: "docker-compose.yml.j2"
+        dest: "{{ gitea_server_path }}/docker-compose.yml"
+        owner: "{{ gitea_server_user }}"
+        group: "{{ gitea_server_group }}"
+        mode: "u=rw,g=r,o=-"
+
+    - name: Create Docker network
+      community.docker.docker_network:
+        name: "{{ gitea_server_network }}"
+        state: present
+
+- name: Systemd Service Setup
+  tags: gitea_service_setup
+  block:
+    - name: Ensure systemd directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/system/
+        state: directory
+        mode: '0755'
+
+    - name: Deploy Gitea systemd service
+      ansible.builtin.template:
+        src: gitea-docker.service.j2
+        dest: /etc/systemd/system/gitea-docker.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Reload systemd
+
+    - name: Enable Gitea service
+      ansible.builtin.systemd:
+        name: gitea-docker
+        enabled: true
+        daemon_reload: true
+
+    - name: Start Gitea service
+      ansible.builtin.systemd:
+        name: gitea-docker
+        state: started

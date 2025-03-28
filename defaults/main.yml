@@ -1,2 +1,14 @@
 ---
-# roles/ansible_role_template/defaults/main.yml
+# roles/gitea_server/defaults/main.yml
+
+gitea_server_user: "gitea"
+gitea_server_group: "docker"
+
+gitea_server_path: "/opt/gitea_server"
+
+gitea_server_domain: "git.example.com"
+gitea_server_network: "gitea-network"
+
+gitea_server_docker_image: "gitea/gitea:latest"
+gitea_server_docker_image_postgress: "postgres:latest"
+gitea_server_timezone: "Europe/Berlin"
