@@ -18,21 +18,12 @@
         state: directory
         owner: "{{ gitea_server_user }}"
         group: "{{ gitea_server_group }}"
-        mode: "u=rwx,g=rx,o="
-        recurse: true
+        mode: "u=rwx,g=rx,o=-"
 
 - name: Docker Compose and Network Setup
   tags: gitea_docker_setup
   block:
     - name: Deploy Docker Compose file
-      ansible.builtin.template:
-        src: docker-compose.yml.j2
-        dest: "{{ gitea_server_path }}/docker-compose.yml"
-        owner: "{{ gitea_server_user }}"
-        group: "{{ gitea_server_group }}"
-        mode: "0640"
-
-    - name: Re-deploy Docker Compose file with different permissions (if needed)
       ansible.builtin.template:
         src: "docker-compose.yml.j2"
         dest: "{{ gitea_server_path }}/docker-compose.yml"
@@ -45,6 +36,23 @@
         name: "{{ gitea_server_network }}"
         state: present
 
+    - name: Check if .env file exists in role's files directory (on control node)
+      ansible.builtin.stat:
+        path: "{{ role_path }}/files/.env"
+      register: env_file_stat
+      delegate_to: localhost
+      run_once: true
+      become: false
+
+    - name: Copy .env file to target host (if available)
+      ansible.builtin.copy:
+        src: ".env"
+        dest: "{{ gitea_server_path }}/.env"
+        owner: "{{ gitea_server_user }}"
+        group: "{{ gitea_server_group }}"
+        mode: 'u=rw,g=-,o=-'
+      when: env_file_stat.stat.exists
+
 - name: Systemd Service Setup
   tags: gitea_service_setup
   block:
@@ -52,7 +60,7 @@
       ansible.builtin.file:
         path: /etc/systemd/system/
         state: directory
-        mode: '0755'
+        mode: 'u=rwx,g=rx,o=rx'
 
     - name: Deploy Gitea systemd service
       ansible.builtin.template:
@@ -60,7 +68,7 @@
         dest: /etc/systemd/system/gitea-docker.service
         owner: root
         group: root
-        mode: '0644'
+        mode: 'u=rw,g=r,o=r'
       notify: Reload systemd
 
     - name: Enable Gitea service

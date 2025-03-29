@@ -33,16 +33,30 @@ The role also installs a `systemd` service to manage the Docker Compose lifecycl
 | `gitea_server_timezone`       | `Europe/Berlin`          | Timezone to configure in the containers                                     |
 
 > **Important:**  
-> Before running this role, you **must** set the PostgreSQL DB password in the `.env` file.  
-> First, copy the provided `example.env` to `{{ gitea_server_path }}/.env`:  
->  
-> ```bash
-> cp example.env {{ gitea_server_path }}/.env
-> ```  
->  
-> Then, manually edit the resulting `.env` file and set a secure value for `GITEA_SERVER_DB_PASSWORD`.  
->  
-> ⚠️ If you skip this step, the role will fail.
+> ⚠️ **If you skip this step, the role will fail.**
+> Before running this role, you **must** set the PostgreSQL DB password in the `.env` file.
+>
+> The simplest way to do this:
+>
+> 1. Copy the provided example file to the target path:  
+>    ```bash
+>    cp example.env {{ gitea_server_path }}/.env
+>    ```
+> 2. Manually edit the resulting `{{ gitea_server_path }}/.env` file and set a secure value for the `GITEA_SERVER_DB_PASSWORD` variable.
+>
+> ---
+>
+> **Advanced alternatives for production setups:**
+>
+> - **Ansible Vault:**  
+>   Use `ansible-vault` to encrypt a custom `.env` file and store it in your private fork or inventory.  
+>   It will gets copied to `{{ gitea_server_path }}/.env` during the playbook execution.
+>
+> - **Secret Manager Integration:**  
+>   In production environments, it's recommended to use a secret manager such as HashiCorp Vault, AWS Secrets Manager, or similar.  
+>   Ansible supports dynamic secrets injection via plugins, allowing you to securely retrieve and set `GITEA_SERVER_DB_PASSWORD` at runtime.
+>
+> These methods provide better security and are especially useful for automated deployments in CI/CD pipelines or other non-interactive environments.
 
 ---
 
@@ -50,7 +64,7 @@ The role also installs a `systemd` service to manage the Docker Compose lifecycl
 
 ```yaml
 - name: Setup Gitea with Docker Compose
-  hosts: gitea
+  hosts: git
   become: true
   roles:
     - role: gitea_docker_compose
